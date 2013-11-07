@@ -7,29 +7,67 @@ case class BaseSegmentation(
   word: String
 )
 
-object Main {
-  val numberWords = List("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+case class Date(
+  year: String,
+  month: String,
+  day: String
+) {
+  override def toString: String = s"$year-$month-$day"
+}
 
+object Main {
+  val publicationDates =
+    {io.Source.fromFile("tempeval2-data/training/english/data/dct.txt").getLines() map { line =>
+      val lineSegments = line split '\t' map (_.trim)
+      lineSegments(0) -> Date(lineSegments(1).slice(0, 4), lineSegments(1).slice(4, 6), lineSegments(1).slice(6, 8))
+    }}.toMap
+
+  val numberWords = List("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
   val matches = List(
     (
       ("^(" + numberWords.mkString("|") + ") years?$").r,
-      (value: String) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
+      (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
       "DURATION"
     ),
-    ("^now$".r, (value: String) => "PRESENT_REF", "DATE"),
-    ("^([1-2]\\d\\d\\d)-(\\d\\d)$".r, (value: String) => value, "DATE"),
-    ("^(week)$".r, (value: String) => "P1W", "DURATION"),
-    ("^(day)$".r, (value: String) => "P1D", "DURATION"),
-    ("^([1-2]\\d{3})$".r, (value: String) => value, "DATE")
+    (
+      "^now|currently$".r,
+      (value: String, segment: BaseSegmentation) => "PRESENT_REF",
+      "DATE"
+    ),
+    (
+      "^([1-2]\\d\\d\\d)-(\\d\\d)$".r,
+      (value: String, segment: BaseSegmentation) => value,
+      "DATE"
+    ),
+    (
+      "^today$".r,
+      (value: String, segment: BaseSegmentation) => publicationDates(segment.source).toString,
+      "DATE"
+    ),
+    (
+      "^week$".r,
+      (value: String, segment: BaseSegmentation) => "P1W",
+      "DURATION"
+    ),
+    (
+      "^day$".r,
+      (value: String, segment: BaseSegmentation) => "P1D",
+      "DURATION"
+    ),
+    (
+      "^([1-2]\\d{3})$".r,
+      (value: String, segment: BaseSegmentation) => value,
+      "DATE"
+    )
   )
 
-  def matchType(word: String): Option[(String, String)] = {
+  def matchType(word: String, segment: BaseSegmentation): Option[(String, String)] = {
     val lowerCaseWord = word.toLowerCase
 
     matches find { case (regex, _, _) =>
       regex.findPrefixOf(lowerCaseWord).isDefined
     } map { case (_, value, kind) =>
-      value(lowerCaseWord) -> kind
+      value(lowerCaseWord, segment) -> kind
     }
   }
 
@@ -51,15 +89,15 @@ object Main {
 
       val result3 =
         if (segment3.isEmpty) None
-        else matchType(s"${segment1.word} ${segment2.get.word} ${segment3.get.word}")
+        else matchType(s"${segment1.word} ${segment2.get.word} ${segment3.get.word}", segment1)
 
       val result2 =
         if (result3.isDefined || segment2.isEmpty) None
-        else matchType(s"${segment1.word} ${segment2.get.word}")
+        else matchType(s"${segment1.word} ${segment2.get.word}", segment1)
 
       val result1 =
         if (result3.isDefined || result2.isDefined) None
-          else matchType(segment1.word)
+        else matchType(segment1.word, segment1)
 
 
       result3 map { case (value, kind) =>
