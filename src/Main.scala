@@ -27,6 +27,20 @@ object Main {
 
   val matches = List(
     (
+      "\\d+ (day|month|year)s?".r,
+      (value: String, segment: BaseSegmentation) => {
+        val unit =
+          if (value.contains("day")) "D"
+          else if (value.contains("month")) "M"
+          else if (value.contains("year")) "Y"
+          else throw new IllegalArgumentException
+
+        s"P${value.filter(_.isDigit)}$unit"
+      },
+      "DURATION"
+    ),
+    (
+      // TODO make this more generic
       numberWords.mkString("^(", "|", ") years?$").r,
       (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
       "DURATION"
