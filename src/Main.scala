@@ -23,11 +23,20 @@ object Main {
     }}.toMap
 
   val numberWords = List("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+  val monthWords = List("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december")
+
   val matches = List(
     (
-      ("^(" + numberWords.mkString("|") + ") years?$").r,
+      numberWords.mkString("^(", "|", ") years?$").r,
       (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
       "DURATION"
+    ),
+    (
+      monthWords.mkString("^", "|", "$").r,
+      (value: String, segment: BaseSegmentation) => {
+        s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}"
+      },
+      "DATE"
     ),
     (
       "^now|currently$".r,
