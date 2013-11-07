@@ -16,6 +16,7 @@ object Main {
       (value: String) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
       "DURATION"
     ),
+    ("$now^".r, (value: String) => "PRESENT_REF", "DATE"),
     ("^([1-2]\\d\\d\\d)-(\\d\\d)$".r, (value: String) => value, "DATE"),
     ("^(week)$".r, (value: String) => "P1W", "DURATION"),
     ("^(day)$".r, (value: String) => "P1D", "DURATION"),
