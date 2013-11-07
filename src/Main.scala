@@ -16,7 +16,7 @@ object Main {
       (value: String) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
       "DURATION"
     ),
-    ("$now^".r, (value: String) => "PRESENT_REF", "DATE"),
+    ("^now$".r, (value: String) => "PRESENT_REF", "DATE"),
     ("^([1-2]\\d\\d\\d)-(\\d\\d)$".r, (value: String) => value, "DATE"),
     ("^(week)$".r, (value: String) => "P1W", "DURATION"),
     ("^(day)$".r, (value: String) => "P1D", "DURATION"),
@@ -24,10 +24,12 @@ object Main {
   )
 
   def matchType(word: String): Option[(String, String)] = {
+    val lowerCaseWord = word.toLowerCase
+
     matches find { case (regex, _, _) =>
-      regex.findPrefixOf(word).isDefined
+      regex.findPrefixOf(lowerCaseWord).isDefined
     } map { case (_, value, kind) =>
-      value(word) -> kind
+      value(lowerCaseWord) -> kind
     }
   }
 
