@@ -1,4 +1,4 @@
-import scala.util.matching.Regex
+import org.joda.time.LocalDate
 
 case class BaseSegmentation(
   source: String,
@@ -27,7 +27,7 @@ object Main {
 
   val matches = List(
     (
-      "\\d+ (day|month|year)s?".r,
+      "^\\d+ (day|month|year)s?$".r,
       (value: String, segment: BaseSegmentation) => {
         val unit =
           if (value.contains("day")) "D"
@@ -44,6 +44,23 @@ object Main {
       numberWords.mkString("^(", "|", ") years?$").r,
       (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
       "DURATION"
+    ),
+    (
+      // TODO Expand to "thursday, weekend, week etc)
+      "^last (year|moth|day)".r,
+      (value: String, segment: BaseSegmentation) => {
+        val publicationDatez = LocalDate.parse(publicationDates(segment.source).toString)
+
+        if (value.contains("year"))
+          publicationDatez.minusYears(1).toString("YYYY")
+        else if (value.contains("month"))
+          publicationDatez.minusMonths(1).toString("YYYY-mm")
+        else if  (value.contains("day"))
+          publicationDatez.minusDays(1).toString("YYYY-mm-dd")
+        else
+          throw new IllegalArgumentException
+      },
+      "DATE"
     ),
     (
       monthWords.mkString("^", "|", "$").r,
