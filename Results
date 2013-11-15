@@ -16,3 +16,26 @@ accuracy    0.96
 attribute type       0.96
 attribute value      0.77
 
+
+2013-11-16
+----------
+true positives:   150
+true negatives:   51324
+false positives:  9
+false negatives:  1967
+
+attribute type: +102.0 -2.0
+attribute value: +69.0 -35.0
+
+precision   0.94
+recall      0.07
+f1-measure  0.13
+accuracy    0.96
+
+attribute type       0.98
+attribute value      0.66
+
+
+
+Process finished with exit code 0
+

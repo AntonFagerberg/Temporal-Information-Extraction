@@ -30,20 +30,29 @@ object Main {
 
   val matches =
     List(
+//    /*
       ( // [Perfect] Ex: January 1983
-        monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d\\d\\d$").r,
+        monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d{3}$").r,
         (value: String, segment: BaseSegmentation) =>
           s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}",
         "DATE"
       )
     ,
-//      (
+//      ( Bad.
 //        monthWords.mkString("^(", "|", ")( ,)?( )?\\d{1,2}( ,)?( )?[1-2]\\d\\d\\d$").r,
 //        (value: String, segment: BaseSegmentation) =>
 //          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.dropRight(4).filter(_.isDigit)).takeRight(2)}",
 //        "DATE"
 //      )
 //    ,
+      ( // [Perfect] In January 1928
+        monthWords.mkString("^[Ii]n (", "|", ") [1-2]\\d{3}$").r,
+        (value: String, segment: BaseSegmentation) => {
+          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(3)).isDefined))).takeRight(2)}"
+        },
+        "DATE"
+      )
+      ,
       ( // [Perfect] Ex: Last January
         monthWords.mkString("^[Ll]ast (", "|", ")$").r,
         (value: String, segment: BaseSegmentation) => {
@@ -56,28 +65,64 @@ object Main {
         },
         "DATE"
       )
-//      ,
+      ,
+      ( // [Perfect -1 val bug] In January last year
+        monthWords.mkString("^[Ii]n (", "|", ") last year$").r,
+        (value: String, segment: BaseSegmentation) =>
+          s"${publicationDates(segment.source).localTime.minusYears(1).toString("YYYY")}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(3)).isDefined))).takeRight(2)}",
+        "DATE"
+      )
+      ,
+      (
+        monthWords.mkString("^[Ii]n (", "|", ")$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val month = 1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(3)).isDefined)
+          val plusYears =
+            if (publicationDates(segment.source).localTime.getMonthOfYear > month) -1
+            else if (publicationDates(segment.source).localTime.getMonthOfYear < month) 1
+            else 0
+
+          s"${publicationDates(segment.source).localTime.plusYears(0).toString("YYYY")}-${("0" + month).takeRight(2)}"
+        },
+        "DATE"
+      )
+      ,
 //      (
 //        monthWords.mkString("^(", "|", ") \\d{1,2}$").r,
 //        (value: String, segment: BaseSegmentation) =>
 //          s"${publicationDates(segment.source).localTime.minusYears(1).toString("YYYY")}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value.filter(!_.isDigit).trim).isDefined))).takeRight(2)}-${(0 + value.filter(_.isDigit).toInt).toString.takeRight(2)}",
 //        "DATE"
-//      ),
+//      )
+//      ,
 //      (
 //        monthWords.mkString("^(", "|", ")$").r,
 //        (value: String, segment: BaseSegmentation) =>
 //          s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}",
 //        "DATE"
 //      )
-//      (
-//        "^((E|e)arly )?(T|t)his week$".r,
+//      ,
+      (
+        "^((E|e)arl(y|ier) )?(T|t)his week$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localTime.toString("YYYY-'W'ww"),
+        "DATE"
+      )
+      ,
+//      ( NOt finished
+//        "^[1-2]\\d( |,|-)".r,
 //        (value: String, segment: BaseSegmentation) =>
 //          publicationDates(segment.source).localTime.toString("YYYY-'W'ww"),
 //        "DATE"
 //      )
+//        ,
+//              */
 
-
-
+      (
+        "^[Ii]n [1-2]\\d{3}$".r,
+        (value: String, segment: BaseSegmentation) =>
+          value.takeRight(4),
+        "DATE"
+      )
 
 //      (
 //        "^a week$".r,
@@ -174,22 +219,19 @@ object Main {
         |""".stripMargin
   }
 
-  val segmentBan =
-    List(
-      "^,$".r
-    )
+  val segmentBan = "^(,|[Ii]n)$".r
 
   def outputTimesExtents(segments: List[BaseSegmentation]): String = {
     for {
       segment <- segments
-      if segmentBan.find(_.findFirstIn(segment.word.trim).isDefined).isEmpty
+      if segmentBan.findFirstIn(segment.word).isEmpty
     } yield {
       s"${segment.source}\t${segment.lineNumber}\t${segment.wordNumber}\ttimex3\tt-\t1\n"
     }
   }.mkString
 
   def writeFiles(segments: List[BaseSegmentation], value: String, kind: String, timexAttributesWriter: PrintWriter, timexExtentsWriter: PrintWriter): Unit = {
-    timexAttributesWriter.append(outputTimesAttributes(segments(0), value, kind))
+    timexAttributesWriter.append(outputTimesAttributes(segments.find(s => segmentBan.findFirstIn(s.word).isEmpty).get, value, kind))
     timexExtentsWriter.append(outputTimesExtents(segments))
   }
 

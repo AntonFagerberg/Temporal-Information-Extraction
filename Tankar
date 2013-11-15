@@ -58,3 +58,35 @@ APW19980418.0210	8	1	timex3	t5	1	value	1995-05-22
 ---
 APW19980418.0210	8	1	timex3	t5	1
 APW19980418.0210	8	4	timex3	t5	1
+
+
+APW19980219.0476	20	0	In
+APW19980219.0476	20	1	July
+APW19980219.0476	20	2	last
+APW19980219.0476	20	3	year
+---
+APW19980219.0476	19	2	timex3	1	t-	type	DATE
+APW19980219.0476	20	1	timex3	1	t-	value	1997-07
+---
+APW19980219.0476	20	1	timex3	t17	1	value	1997-06
+APW19980219.0476	20	1	timex3	t17	1	type	DATE
+
+
+Not found
+---
+wsj_0584	34	8	timex3	1	t-	value	1995
+wsj_0584	34	8	timex3	1	t-	type	DATE
+---
+wsj_0584	34	0	"
+wsj_0584	34	1	How
+wsj_0584	34	2	many
+wsj_0584	34	3	shares
+wsj_0584	34	4	will
+wsj_0584	34	5	be
+wsj_0584	34	6	around
+wsj_0584	34	7	in
+wsj_0584	34	8	1995
+wsj_0584	34	9	?
+wsj_0584	34	10	"
+wsj_0584	35	0	he
+wsj_0584	35	1	asked
