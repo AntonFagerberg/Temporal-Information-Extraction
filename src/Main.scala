@@ -30,24 +30,33 @@ object Main {
 
   val matches =
     List(
-//      ( // [Perfect] January 1983
-//        monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d\\d\\d$").r,
-//        (value: String, segment: BaseSegmentation) =>
-//          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}",
-//        "DATE"
-//      ),
-      (
-        monthWords.mkString("^(", "|", ")( ,)?( )?\\d{1,2}( ,)?( )?[1-2]\\d\\d\\d$").r,
+      ( // [Perfect] Ex: January 1983
+        monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d\\d\\d$").r,
         (value: String, segment: BaseSegmentation) =>
-          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.dropRight(4).filter(_.isDigit)).takeRight(2)}",
+          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}",
         "DATE"
       )
+    ,
 //      (
-//        monthWords.mkString("^[Ll]ast (", "|", ")$").r,
+//        monthWords.mkString("^(", "|", ")( ,)?( )?\\d{1,2}( ,)?( )?[1-2]\\d\\d\\d$").r,
 //        (value: String, segment: BaseSegmentation) =>
-//          s"${publicationDates(segment.source).localTime.minusYears(1).toString("YYYY")}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(5)).isDefined))).takeRight(2)}",
+//          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.dropRight(4).filter(_.isDigit)).takeRight(2)}",
 //        "DATE"
-//      ),
+//      )
+//    ,
+      ( // [Perfect] Ex: Last January
+        monthWords.mkString("^[Ll]ast (", "|", ")$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val month = 1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(5)).isDefined)
+          val minusYears =
+            if (publicationDates(segment.source).localTime.getMonthOfYear > month) 0
+            else 1
+
+          s"${publicationDates(segment.source).localTime.minusYears(minusYears).toString("YYYY")}-${("0" + month).takeRight(2)}"
+        },
+        "DATE"
+      )
+//      ,
 //      (
 //        monthWords.mkString("^(", "|", ") \\d{1,2}$").r,
 //        (value: String, segment: BaseSegmentation) =>
