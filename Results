@@ -1,0 +1,18 @@
+First test
+----------
+true positives:   420
+true negatives:   51090
+false positives:  243
+false negatives:  1697
+
+attribute type: +230.0 -10.0
+attribute value: +185.0 -55.0
+
+precision   0.63
+recall      0.20
+f1-measure  0.30
+accuracy    0.96
+
+attribute type       0.96
+attribute value      0.77
+

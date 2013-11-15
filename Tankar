@@ -1,0 +1,27 @@
+This Week = TV-program
+
+WTFs!?
+wsj_0675	10	9	timex3	t311	1	value	1989-WXX
+wsj_0675	10	9	timex3	t311	1	type	DATE
+
+wsj_0745	22	0	timex3	t311	1	value	1989-WXX
+wsj_0675	10	9	timex3	t311	1	type	DATE
+
+base-segment.tab
+----------------
+wsj_0135	0	12	June
+wsj_0135	0	13	30
+wsj_0135	0	14	,
+wsj_0135	0	15	1990
+
+Ger:
+----
+wsj_0135	0	12	timex3	t-	1
+wsj_0135	0	13	timex3	t-	1
+wsj_0135	0	15	timex3	t-	1
+
+Facit:
+------
+wsj_0135	0	12	timex3	t27	1
+wsj_0135	0	14	timex3	t27	1
+wsj_0135	0	15	timex3	t27	1
