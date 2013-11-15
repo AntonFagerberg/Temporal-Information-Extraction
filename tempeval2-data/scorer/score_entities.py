@@ -110,8 +110,8 @@ def score_entities(tokens, key_extents, response_extents, key_attrs, response_at
     
     #print
     #scores.pp_data()
-    #scores.pp_counts()
-    #scores.pp_stats()
+    scores.pp_counts()
+    scores.pp_stats()
     return scores
 
 
