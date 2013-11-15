@@ -25,3 +25,36 @@ Facit:
 wsj_0135	0	12	timex3	t27	1
 wsj_0135	0	14	timex3	t27	1
 wsj_0135	0	15	timex3	t27	1
+
+---
+wsj_0541	0	19	March
+wsj_0541	0	20	1
+wsj_0541	0	21	,
+wsj_0541	0	22	2011
+---
+wsj_0541	0	19	timex3	t-	1
+wsj_0541	0	20	timex3	t-	1
+wsj_0541	0	22	timex3	t-	1
+---
+wsj_0541	0	19	timex3	t20	1
+wsj_0541	0	21	timex3	t20	1
+wsj_0541	0	22	timex3	t20	1
+
+---
+APW19980418.0210	8	1	May
+APW19980418.0210	8	2	22
+APW19980418.0210	8	3	,
+APW19980418.0210	8	4	1995
+---
+APW19980418.0210	8	1	timex3	1	t-	value	1995-05-22
+APW19980418.0210	8	1	timex3	1	t-	type	DATE
+---
+APW19980418.0210	8	1	timex3	t-	1
+APW19980418.0210	8	2	timex3	t-	1
+APW19980418.0210	8	4	timex3	t-	1
+---
+APW19980418.0210	8	1	timex3	t5	1	type	DATE
+APW19980418.0210	8	1	timex3	t5	1	value	1995-05-22
+---
+APW19980418.0210	8	1	timex3	t5	1
+APW19980418.0210	8	4	timex3	t5	1
