@@ -123,15 +123,15 @@ object Main {
           value.takeRight(4),
         "DATE"
       )
-
+//      ,
 //      (
-//        "^a week$".r,
+//        "^[Aa] week$".r,
 //        (value: String, segment: BaseSegmentation) => "P1W",
 //        "DURATION"
 //      )
-//    )
+//      ,
 //      (
-//        "^\\d+ (day|month|year)s?$".r,
+//        "^\\d+ (day|month|year)s$".r,
 //        (value: String, segment: BaseSegmentation) => {
 //          val unit =
 //            if (value.contains("day")) "D"
@@ -142,67 +142,87 @@ object Main {
 //          s"P${value.filter(_.isDigit)}$unit"
 //        },
 //        "DURATION"
-//      ),
+//      )
 //      (
 //        // TODO make this more generic
 //        numberWords.mkString("^(", "|", ") years?$").r,
 //        (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
 //        "DURATION"
-//      ),
-//      (
-//        // TODO Expand to "thursday, weekend, week etc)
-//        "^last (year|moth|day)".r,
-//        (value: String, segment: BaseSegmentation) => {
-//          val publicationDatez = LocalDate.parse(publicationDates(segment.source).toString)
-//
-//          if (value.contains("year"))
-//            publicationDatez.minusYears(1).toString("YYYY")
-//          else if (value.contains("month"))
-//            publicationDatez.minusMonths(1).toString("YYYY-mm")
-//          else if  (value.contains("day"))
-//            publicationDatez.minusDays(1).toString("YYYY-mm-dd")
-//          else
-//            throw new IllegalArgumentException
-//        },
-//        "DATE"
-//      ),
+//      )
+      ,
+      (
+        "^([Ll]ast|[Pp]revious) (year|month)$".r,
+        (value: String, segment: BaseSegmentation) => {
+          val publicationDatez = publicationDates(segment.source).localTime
+
+          if (value.contains("year"))
+            publicationDatez.minusYears(1).toString("YYYY")
+          else if (value.contains("month"))
+            publicationDatez.minusMonths(1).toString("YYYY-mm")
+          else
+            throw new IllegalArgumentException
+        },
+        "DATE"
+      )
+      ,
+      (
+        "^([Nn]ext|[Ff]ollowing) (year|month)$".r,
+        (value: String, segment: BaseSegmentation) => {
+          val publicationDatez = publicationDates(segment.source).localTime
+
+          if (value.contains("year"))
+            publicationDatez.plusYears(1).toString("YYYY")
+          else if (value.contains("month"))
+            publicationDatez.plusMonths(1).toString("YYYY-mm")
+          else
+            throw new IllegalArgumentException
+        },
+        "DATE"
+      )
+//      ,
 //      (
 //        monthWords.mkString("^(", "|", ")$").r,
 //        (value: String, segment: BaseSegmentation) => {
 //          s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}"
 //        },
 //        "DATE"
-//      ),
-//      (
+//      )
+//      ,
+//      ( // Mängder false positives
 //        "^now|currently$".r,
 //        (value: String, segment: BaseSegmentation) => "PRESENT_REF",
 //        "DATE"
-//      ),
-//      (
-//        "^([1-2]\\d\\d\\d)-(\\d\\d)$".r,
-//        (value: String, segment: BaseSegmentation) => value,
-//        "DATE"
-//      ),
-//      (
-//        "^today$".r,
-//        (value: String, segment: BaseSegmentation) => publicationDates(segment.source).toString,
-//        "DATE"
-//      ),
-//      (
-//        "^week$".r,
-//        (value: String, segment: BaseSegmentation) => "P1W",
-//        "DURATION"
-//      ),
-//      (
-//        "^day$".r,
-//        (value: String, segment: BaseSegmentation) => "P1D",
-//        "DURATION"
-//      ),
-//      (
-//        "^([1-2]\\d{3})$".r,
-//        (value: String, segment: BaseSegmentation) => value,
-//        "DATE"
 //      )
+      ,
+      (
+        "^([1-2]\\d\\d\\d)-(\\d\\d)$".r,
+        (value: String, segment: BaseSegmentation) => value,
+        "DATE"
+      )
+      ,
+      (
+        "^today$".r,
+        (value: String, segment: BaseSegmentation) => publicationDates(segment.source).toString,
+        "DATE"
+      )
+      ,
+      (
+        "^week$".r,
+        (value: String, segment: BaseSegmentation) => "P1W",
+        "DURATION"
+      )
+      ,
+      (
+        "^day$".r,
+        (value: String, segment: BaseSegmentation) => "P1D",
+        "DURATION"
+      )
+      ,
+      (
+        "^([1-2]\\d{3})$".r,
+        (value: String, segment: BaseSegmentation) => value,
+        "DATE"
+      )
     )
 
   def matchType(word: String, segment: BaseSegmentation): Option[(String, String)] = {
@@ -257,7 +277,10 @@ object Main {
     val timexAttributesWriter = new PrintWriter(timexAttributesFile)
     val timexExtentsWriter = new PrintWriter(timexExtentsFile)
 
-    for (segments <- lineSegments.sliding(5, 1)) {
+    var skip = 1
+
+    for (segments <- lineSegments.sliding(5, 1) if {skip -= 1 ; skip == 0}) {
+      skip = 1
       val segment1 = segments(0)
       val segment2 = segments.lift(1)
       val segment3 = segments.lift(2)
@@ -286,15 +309,19 @@ object Main {
 
       result5 map { case (value, kind) =>
         writeFiles(List(segment1, segment2.get, segment3.get, segment4.get, segment5.get), value, kind, timexAttributesWriter, timexExtentsWriter)
+        skip = 5
       } getOrElse {
         result4 map { case (value, kind) =>
           writeFiles(List(segment1, segment2.get, segment3.get, segment4.get), value, kind, timexAttributesWriter, timexExtentsWriter)
+          skip = 4
         } getOrElse {
           result3 map { case (value, kind) =>
             writeFiles(List(segment1, segment2.get, segment3.get), value, kind, timexAttributesWriter, timexExtentsWriter)
+            skip = 3
           } getOrElse {
             result2 map { case (value, kind) =>
               writeFiles(List(segment1, segment2.get), value, kind, timexAttributesWriter, timexExtentsWriter)
+              skip = 2
             } getOrElse {
               result1 foreach { case (value, kind) =>
                 writeFiles(List(segment1), value, kind, timexAttributesWriter, timexExtentsWriter)
