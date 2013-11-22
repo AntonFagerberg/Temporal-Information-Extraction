@@ -25,14 +25,15 @@ object Main {
       lineSegments(0) -> Date(lineSegments(1).slice(0, 4), lineSegments(1).slice(4, 6), lineSegments(1).slice(6, 8))
     }}.toMap
 
-  val numberWords = List("[Zz]ero", "[Oo]ne", "[Tt]wo", "[Tt]hree", "[Ff]our", "[Ff]ive", "[Ss]ix", "[Ss]even", "[Ee]ight", "[Nn]ine", "[Tt]en")
+  val numberWords = List("[Zz]ero", "[Oo]ne", "[Tt]wo", "[Tt]hree", "[Ff]our", "[Ff]ive", "[Ss]ix", "[Ss]even", "[Ee]ight", "[Nn]ine", "[Tt]en", "[Ee]leven", "[Tt]welve", "[Tt]hirteen", "[Ff]ourteen", "[Ff]ifteen", "[Ss]ixteen", "[Ss]eventeen", "[Ee]ighteen", "[Nn]ineteen", "[Tt]wenty")
   val monthWords = List("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
   val matches =
     List(
       /*
-       * MONTH NAMES
+       * JANUARY
        */
+//      /*
       ( // [Perfect] Ex: January 1983
         monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d{3}$").r,
         (value: String, segment: BaseSegmentation) =>
@@ -90,27 +91,12 @@ object Main {
         "DATE"
       )
       ,
-      /*
-       * TIME AGO
-       */
-      ( // TODO Quarter bug!?
-        "^[Aa] year ago$".r,
-        (value: String, segment: BaseSegmentation) => {
-          val publicationDate = publicationDates(segment.source).localDate
-          val month = publicationDate.getMonthOfYear
-          println(publicationDate.toString)
-          println(month)
-          val quarter =
-            if (month <= 3) 1
-            else if (month <= 6) 2
-            else if (month <= 9) 3
-            else 4
+//      */
 
-          s"${publicationDate.minusYears(1).toString("YYYY")}-Q$quarter"
-        },
-        "DATE"
-      )
-      ,
+      /*
+       * YEAR
+       */
+//      /*
       (
         //
         numberWords.mkString("^([Aa]bout|[Aa]lmost|[Pp]robably|[Nn]early|[Rr]ougly) (", "|", ") [Yy]ears? ago$").r,
@@ -120,7 +106,7 @@ object Main {
           s"P${index}Y"
         },
         "DATE"
-      )
+        )
       ,
       (
         //
@@ -135,68 +121,222 @@ object Main {
         "DATE"
       )
       ,
+//      */
+
+      /*
+       * MONTH
+       */
+//      /*
       ( // [Perfect] A month ago
         "^[Aa] month ago$".r,
-        (value: String, segment: BaseSegmentation) => publicationDates(segment.source).localDate.minusMonths(1).toString("YYYY-MM"),
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.minusMonths(1).toString("YYYY-MM"),
         "DATE"
       )
       ,
-      ( // [OK] A week ago (no test scenario)
-        "^[Aa] week ago$".r,
-        (value: String, segment: BaseSegmentation) => publicationDates(segment.source).localDate.minusWeeks(1).toString("YYYY-MM-dd"),
+      ( // [OK | No test case] A month from now
+        "^[Aa] month from now$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.plusMonths(1).toString("YYYY-MM"),
+        "DURATION"
+      )
+      ,
+      ( // [OK] A month
+        "^[Aa] month$".r,
+        (value: String, segment: BaseSegmentation) => "P1M",
+        "DURATION"
+      )
+      ,
+      ( // [OK] The following / Next Month
+        "^(([Tt]he )?[Ff]ollowing|[Nn]ext) month$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.plusMonths(1).toString("YYYY-MM"),
         "DATE"
       )
       ,
+      ( // [Perfect] The previous / last month
+        "^(([Tt]he )?[Pp]revious|[Ll]ast) month$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.minusMonths(1).toString("YYYY-MM"),
+        "DATE"
+      )
+      ,
+      ( // [Perfect] Two months ago
+        numberWords.mkString("^(", "|", ") months? ago$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val numberIndex = numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)
+          publicationDates(segment.source).localDate.minusMonths(numberIndex).toString("YYYY-MM")
+        },
+        "DATE"
+      )
+      ,
+      ( // [OK | No test case] Two months from now.
+        numberWords.mkString("^(", "|", ") months? from now").r,
+        (value: String, segment: BaseSegmentation) => {
+          val numberIndex = numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)
+          publicationDates(segment.source).localDate.plusMonths(numberIndex).toString("YYYY-MM")
+        },
+        "DATE"
+      )
+      ,
+      ( // [No test case] 1 months ago
+        "^\\d+ months? ago$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.minusMonths(value.filter(_.isDigit).toInt).toString("YYYY-MM")
+        ,
+        "DATE"
+      )
+      ,
+      ( // [No test case] 2 months form now
+        "^\\d+ months? from now$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.plusMonths(value.filter(_.isDigit).toInt).toString("YYYY-MM")
+        ,
+        "DATE"
+      )
+      ,
+//      */
+
+
+      /*
+       * WEEK
+       */
+//      /*
       (
         // [Perfect | -1 AV] X weeks ago
         numberWords.mkString("^(", "|", ") [Ww]eeks? ago$").r,
         (value: String, segment: BaseSegmentation) => {
           publicationDates(segment.source)
             .localDate
-            .minusDays(numberWords.indexWhere(_.r.findPrefixOf(value).isDefined))
+            .minusWeeks(numberWords.indexWhere(_.r.findPrefixOf(value).isDefined))
             .toString
         },
         "DATE"
       )
       ,
-      ( // [Perfect | -1 AV] Yesterday / A day ago
-        "^([Yy]esterday|[Aa] day ago)$".r,
-        (value: String, segment: BaseSegmentation) => publicationDates(segment.source).localDate.minusDays(1).toString("YYYY-MM-dd"),
+      ( // [OK] A week ago (no test scenario)
+        "^[Aa] week ago$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.minusWeeks(1).toString("YYYY-MM-dd"),
         "DATE"
       )
       ,
+      (
+        "^[Aa] week$".r,
+        (value: String, segment: BaseSegmentation) => "P1W",
+        "DURATION"
+      )
+      ,
+//      */
+
       /*
-       * MONTH DURATION
+       * DAY
        */
-      ( // [OK] A month
-        "^[Aa] month$".r,
+      ( // [Perfect | -1 AV] Yesterday / A day ago
+        "^([Yy]esterday|[Aa] day ago)$".r,
         (value: String, segment: BaseSegmentation) =>
-          "P1M"
+          publicationDates(segment.source).localDate.minusDays(1).toString,
+        "DATE"
+      )
+      ,
+      ( // [GOOD | -3 AV, 2 FP] Yesterday / A day ago
+        "^[Tt]oday$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).toString,
+        "DATE"
+      )
+      ,
+      ( // [Perfect] 2 days ago
+        "^\\d+ days? ago$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.minusDays(value.filter(_.isDigit).toInt).toString,
+        "DATE"
+      )
+      ,
+      ( // [No test case] 2 from now
+        "^\\d+ days? from now$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.plusDays(value.filter(_.isDigit).toInt).toString,
+        "DATE"
+      )
+      ,
+      ( // [No test case] two days ago
+        numberWords.mkString("^(", "|", ") days? ago$").r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source)
+            .localDate
+            .minusDays(numberWords.indexWhere(_.r.findPrefixOf(value).isDefined))
+            .toString
+        ,
+        "DATE"
+      )
+      ,
+
+
+//      ( // [WARNING | Actually reduces result in training set] two days from now
+//        numberWords.mkString("^(", "|", ") days? (from now|later)$").r,
+//        (value: String, segment: BaseSegmentation) =>
+//          publicationDates(segment.source)
+//            .localDate
+//            .plusDays(numberWords.indexWhere(_.r.findPrefixOf(value).isDefined))
+//            .toString
+//        ,
+//        "DATE"
+//      )
+//      ,
+      ( // [OK | 7 FP]
+        numberWords.mkString("^(", "|", ") days?$").r,
+        (value: String, segment: BaseSegmentation) =>
+          s"P${numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)}D"
         ,
         "DURATION"
+      )
+      ,
+      /*
+       * NUMERICS
+       */
+      (
+        // [???] 1987-03
+        "^([1-2]\\d\\d\\d)(-| )(\\d\\d)$".r,
+        (value: String, segment: BaseSegmentation) => value,
+        "DATE"
+      )
+      ,
+      ( // [OK | -1 AV, 3 FP] 1998
+        "^([1-2]\\d{3})$".r,
+        (value: String, segment: BaseSegmentation) => value,
+        "DATE"
       )
 
 
 
 
-//      ,
-//      ( // In January
-//        monthWords.mkString("^[Ii]n (", "|", ")$").r,
+
+//      ( // TODO Quarter bug!?
+//        "^[Aa] year ago$".r,
 //        (value: String, segment: BaseSegmentation) => {
-//          val month = 1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(3)).isDefined)
-//          val plusYears =
-//            if (publicationDates(segment.source).localDate.getMonthOfYear > month) -1
-//            else if (publicationDates(segment.source).localDate.getMonthOfYear < month) 1
-//            else 0
+//          val publicationDate = publicationDates(segment.source).localDate
+//          val month = publicationDate.getMonthOfYear
+//          println(publicationDate.toString)
+//          println(month)
+//          val quarter =
+//            if (month <= 3) 1
+//            else if (month <= 6) 2
+//            else if (month <= 9) 3
+//            else 4
 //
-//          s"${publicationDates(segment.source).localDate.plusYears(0).toString("YYYY")}-${("0" + month).takeRight(2)}"
+//          s"${publicationDate.minusYears(1).toString("YYYY")}-Q$quarter"
 //        },
 //        "DATE"
 //      )
-    /*
+//      ,
 
-    ,
 
+
+
+
+
+/*
 
       ,
       ( // Earlier / Later this week
@@ -220,27 +360,7 @@ object Main {
 //        "DATE"
 //      )
       ,
-      ( // In 1987
-        "^[Ii]n [1-2]\\d{3}$".r,
-        (value: String, segment: BaseSegmentation) =>
-          value.takeRight(4),
-        "DATE"
-      )
-      ,
-      ( // Last / previous month
-        "^([Ll]ast|[Pp]revious) (year|month)$".r,
-        (value: String, segment: BaseSegmentation) => {
-          val publicationDatez = publicationDates(segment.source).localDate
 
-          if (value.contains("year"))
-            publicationDatez.minusYears(1).toString("YYYY")
-          else if (value.contains("month"))
-            publicationDatez.minusMonths(1).toString("YYYY-mm")
-          else
-            throw new IllegalArgumentException
-        },
-        "DATE"
-      )
       ,
       ( // Next / Following
         "^([Nn]ext|[Ff]ollowing) (year|month)$".r,
@@ -256,13 +376,7 @@ object Main {
         },
         "DATE"
       )
-      ,
-      (
-        // 1987-03
-        "^([1-2]\\d\\d\\d)-(\\d\\d)$".r,
-        (value: String, segment: BaseSegmentation) => value,
-        "DATE"
-      )
+
       ,
       (
         "^[Tt]oday$".r,
