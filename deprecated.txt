@@ -1,0 +1,79 @@
+//      ( Bad.
+//        monthWords.mkString("^(", "|", ")( ,)?( )?\\d{1,2}( ,)?( )?[1-2]\\d\\d\\d$").r,
+//        (value: String, segment: BaseSegmentation) =>
+//          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.dropRight(4).filter(_.isDigit)).takeRight(2)}",
+//        "DATE"
+//      )
+//    ,
+//      ( // [Perfect] In January 1928
+//        monthWords.mkString("^[Ii]n (", "|", ") [1-2]\\d{3}$").r,
+//        (value: String, segment: BaseSegmentation) => {
+//          s"${value.takeRight(4)}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value.drop(3)).isDefined))).takeRight(2)}"
+//        },
+//        "DATE"
+//      )
+//      ,
+
+//      (
+//        monthWords.mkString("^(", "|", ") \\d{1,2}$").r,
+//        (value: String, segment: BaseSegmentation) =>
+//          s"${publicationDates(segment.source).localTime.minusYears(1).toString("YYYY")}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value.filter(!_.isDigit).trim).isDefined))).takeRight(2)}-${(0 + value.filter(_.isDigit).toInt).toString.takeRight(2)}",
+//        "DATE"
+//      )
+//      ,
+//      (
+//        monthWords.mkString("^(", "|", ")$").r,
+//        (value: String, segment: BaseSegmentation) =>
+//          s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}",
+//        "DATE"
+//      )
+//      ,
+//      ( NOt finished
+//        "^[1-2]\\d( |,|-)".r,
+//        (value: String, segment: BaseSegmentation) =>
+//          publicationDates(segment.source).localTime.toString("YYYY-'W'ww"),
+//        "DATE"
+//      )
+//        ,
+//              */
+//      ,
+//      (
+//        "^[Aa] week$".r,
+//        (value: String, segment: BaseSegmentation) => "P1W",
+//        "DURATION"
+//      )
+//      ,
+//      (
+//        "^\\d+ (day|month|year)s$".r,
+//        (value: String, segment: BaseSegmentation) => {
+//          val unit =
+//            if (value.contains("day")) "D"
+//            else if (value.contains("month")) "M"
+//            else if (value.contains("year")) "Y"
+//            else throw new IllegalArgumentException
+//
+//          s"P${value.filter(_.isDigit)}$unit"
+//        },
+//        "DURATION"
+//      )
+//      (
+//        // TODO make this more generic
+//        numberWords.mkString("^(", "|", ") years?$").r,
+//        (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(numberWord => numberWord.r.findPrefixOf(value).isDefined)}Y",
+//        "DURATION"
+//      )
+
+//      ,
+//      (
+//        monthWords.mkString("^(", "|", ")$").r,
+//        (value: String, segment: BaseSegmentation) => {
+//          s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}"
+//        },
+//        "DATE"
+//      )
+//      ,
+//      ( // Mängder false positives
+//        "^now|currently$".r,
+//        (value: String, segment: BaseSegmentation) => "PRESENT_REF",
+//        "DATE"
+//      )
