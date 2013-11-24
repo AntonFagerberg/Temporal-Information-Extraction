@@ -594,7 +594,7 @@ object Main {
         |""".stripMargin
   }
 
-  val segmentBan = "^(,|[Ii]n|[Oo]n)$".r
+  val segmentBan = "^(,|[Ii]n)$".r
 
   def outputTimesExtents(segments: List[BaseSegmentation]): String = {
     for {
