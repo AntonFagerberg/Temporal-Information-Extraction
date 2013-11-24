@@ -221,8 +221,22 @@ object Main {
         "DATE"
       )
       ,
-      (
-        "^[Aa] week$".r,
+      ( // [Good | -3 AV] This week
+        "^[Tt]his week$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.toString("YYYY-'W'ww"),
+        "DATE"
+      )
+      ,
+      ( //
+        "^[Nn]ext week$".r,
+        (value: String, segment: BaseSegmentation) =>
+          publicationDates(segment.source).localDate.plusWeeks(1).toString("YYYY-'W'ww"),
+        "DATE"
+      )
+      ,
+      ( // [???] A week
+        "^([Aa] )?week$".r,
         (value: String, segment: BaseSegmentation) => "P1W",
         "DURATION"
       )
@@ -271,6 +285,19 @@ object Main {
         "DATE"
       )
       ,
+    // Porblem one day != 1 day
+//      (
+//        numberWords.mkString("^(", "|", ") days?").r,
+//        (value: String, segment: BaseSegmentation) => s"P${numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)}D",
+//        "DURATION"
+//      )
+//      ,
+//      ( // [No test case] 2 from now
+//        "^day$".r,
+//        (value: String, segment: BaseSegmentation) => "P1D",
+//        "DATE"
+//      )
+//      ,
 
 
 //      ( // [WARNING | Actually reduces result in training set] two days from now
@@ -289,6 +316,12 @@ object Main {
         (value: String, segment: BaseSegmentation) =>
           s"P${numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)}D"
         ,
+        "DURATION"
+      )
+      ,
+      ( // [Perfect] The last 24 hours
+        "^(([Tt]he )?[Ll]ast )?(twenty ?four|24) hours".r,
+        (value: String, segment: BaseSegmentation) => s"P1D",
         "DURATION"
       )
       ,
