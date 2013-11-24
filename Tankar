@@ -17,6 +17,10 @@ CNN19980222.1130.0084	5	18	than
 CNN19980222.1130.0084	5	19	sixty
 CNN19980222.1130.0084	5	20	days
 
+right now, it now, are now, is now, now that, big question now != PRESENT_REF
+
+(was / will be) found in october -> vilket oktober?
+
 WTFs!?
 wsj_0675	10	9	timex3	t311	1	value	1989-WXX
 wsj_0675	10	9	timex3	t311	1	type	DATE

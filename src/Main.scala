@@ -33,7 +33,7 @@ object Main {
       /*
        * JANUARY
        */
-//      /*
+      /*
       ( // [Perfect] Ex: January 1983
         monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d{3}$").r,
         (value: String, segment: BaseSegmentation) =>
@@ -96,7 +96,7 @@ object Main {
       /*
        * YEAR
        */
-//      /*
+      /*
       (
         //
         numberWords.mkString("^([Aa]bout|[Aa]lmost|[Pp]robably|[Nn]early|[Rr]ougly) (", "|", ") [Yy]ears? ago$").r,
@@ -105,7 +105,7 @@ object Main {
           val index = numberWords.indexWhere(_.r.findPrefixOf(monthName).isDefined)
           s"P${index}Y"
         },
-        "DATE"
+        "DURATION"
         )
       ,
       (
@@ -121,12 +121,22 @@ object Main {
         "DATE"
       )
       ,
+      (
+        // [Perfect] Two year
+        numberWords.mkString("^(", "|", ") [Yy]ears?$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val index = numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)
+          s"P${index}Y"
+        },
+        "DURATION"
+      )
+      ,
 //      */
 
       /*
        * MONTH
        */
-//      /*
+      /*
       ( // [Perfect] A month ago
         "^[Aa] month ago$".r,
         (value: String, segment: BaseSegmentation) =>
@@ -195,13 +205,23 @@ object Main {
         "DATE"
       )
       ,
+      ( // [Very good | 2 FP] (Past) two months
+        numberWords.mkString("^(([Tt]he )?[Pp]ast )?(", "|", ") months?$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val valueParts = value.split(" ")
+          val numberIndex = numberWords.indexWhere(_.r.findPrefixOf(valueParts(valueParts.length - 2)).isDefined)
+          s"P${numberIndex}M"
+        },
+        "DURATION"
+      )
+      ,
 //      */
 
 
       /*
        * WEEK
        */
-//      /*
+      /*
       (
         // [Perfect | -1 AV] X weeks ago
         numberWords.mkString("^(", "|", ") [Ww]eeks? ago$").r,
@@ -246,6 +266,7 @@ object Main {
       /*
        * DAY
        */
+    /*
       ( // [Perfect | -1 AV] Yesterday / A day ago
         "^([Yy]esterday|[Aa] day ago)$".r,
         (value: String, segment: BaseSegmentation) =>
@@ -340,6 +361,68 @@ object Main {
         (value: String, segment: BaseSegmentation) => value,
         "DATE"
       )
+      ,
+      /*
+       * WORDS
+       */
+      ( // [Not great | 16 FP, also issue 3] Now
+        "^[Nn]ow$".r,
+        (value: String, segment: BaseSegmentation) => "PRESENT_REF",
+        "DATE"
+      )
+      ,
+//      */
+      /*
+       * TIME
+       */
+
+      ( // [No test case] 2 minutes
+        "^\\d+ minutes?$".r,
+        (value: String, segment: BaseSegmentation) =>
+          s"PT${value.filter(_.isDigit)}M",
+        "DURATION"
+      )
+      ,
+      ( // [No test case] Two minutes
+        numberWords.mkString("^(", "|", ")( |-)minutes?$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val numberIndex = numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)
+          s"PT${numberIndex}M"
+        },
+        "DURATION"
+      )
+      ,
+      ( // [Perfect] A few minutes
+        "^[Aa] few minutes$".r,
+        (value: String, segment: BaseSegmentation) => "PXM",
+        "DURATION"
+      )
+      ,
+      ( // [Perfect] Minute and half
+        "^minute and a half$".r,
+        (value: String, segment: BaseSegmentation) => "PT1M30S",
+        "DURATION"
+      )
+      ,
+      ( // [Perfect] (More / Less than) Two hours
+        numberWords.mkString("^(([Ll]ess|[Mm]ore) than )?(", "|", ")( |-)hours?$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val valueFix =
+            if (value.slice(1, 4) == "ore" || value.slice(1, 4) == "ess") value.drop(10)
+            else value
+
+          s"PT${numberWords.indexWhere(_.r.findPrefixOf(valueFix).isDefined)}H"
+        },
+        "DURATION"
+      )
+      ,
+      ( // [No test case] 2 hours
+        "\\d+( |-)hours?$".r,
+        (value: String, segment: BaseSegmentation) => {
+          s"PT${value.filter(_.isDigit)}H"
+        },
+        "DURATION"
+      )
 
 
 
@@ -366,7 +449,7 @@ object Main {
 
 
 
-
+//*/
 
 
 /*
@@ -455,6 +538,8 @@ object Main {
         "DATE"
       )
       */
+
+
     )
 
   def matchType(word: String, segment: BaseSegmentation): Option[(String, String)] = {

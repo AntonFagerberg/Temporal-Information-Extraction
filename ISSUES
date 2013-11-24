@@ -17,3 +17,7 @@ wsj_0585	37	0	timex3	t341	1	type	DURATION
 
 wsj_0585	37	0	timex3	1	t-1660851912	value	1989-11-02
 wsj_0585	37	0	timex3	1	t-1660851912	type	DATE
+
+#3
+AP900815-0044	25	2	timex3	t17	1	value	1990-08-15T13:37
+AP900815-0044	25	2	timex3	t17	1	type	DATE
