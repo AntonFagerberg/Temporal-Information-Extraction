@@ -21,6 +21,15 @@ right now, it now, are now, is now, now that, big question now != PRESENT_REF
 
 (was / will be) found in october -> vilket oktober?
 
+Fixa:
+
+ABC19980108.1830.0711	2	0	In
+ABC19980108.1830.0711	2	1	the
+ABC19980108.1830.0711	2	2	last
+ABC19980108.1830.0711	2	3	twenty
+ABC19980108.1830.0711	2	4	four
+ABC19980108.1830.0711	2	5	hours
+
 WTFs!?
 wsj_0675	10	9	timex3	t311	1	value	1989-WXX
 wsj_0675	10	9	timex3	t311	1	type	DATE

@@ -25,15 +25,16 @@ object Main {
       lineSegments(0) -> Date(lineSegments(1).slice(0, 4), lineSegments(1).slice(4, 6), lineSegments(1).slice(6, 8))
     }}.toMap
 
-  val numberWords = List("[Zz]ero", "[Oo]ne", "[Tt]wo", "[Tt]hree", "[Ff]our", "[Ff]ive", "[Ss]ix", "[Ss]even", "[Ee]ight", "[Nn]ine", "[Tt]en", "[Ee]leven", "[Tt]welve", "[Tt]hirteen", "[Ff]ourteen", "[Ff]ifteen", "[Ss]ixteen", "[Ss]eventeen", "[Ee]ighteen", "[Nn]ineteen", "[Tt]wenty")
+  val numberWords = List("[Zz]ero", "[Oo]ne", "[Tt]wo", "[Tt]hree", "[Ff]our", "[Ff]ive", "[Ss]ix", "[Ss]even", "[Ee]ight", "[Nn]ine", "[Tt]en", "[Ee]leven", "[Tt]welve", "[Tt]hirteen", "[Ff]ourteen", "[Ff]ifteen", "[Ss]ixteen", "[Ss]eventeen", "[Ee]ighteen", "[Nn]ineteen", "[Tt]wenty", "[Tt]wenty [Oo]ne", "[Tt]wenty [Tt]wo", "[Tt]wenty [Tt]hree", "[Tt]wenty [Ff]our")
   val monthWords = List("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+  val dayNames = List("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
   val matches =
     List(
       /*
        * JANUARY
        */
-      /*
+//      /*
       ( // [Perfect] Ex: January 1983
         monthWords.mkString("^(", "|", ")( ,)?( )?[1-2]\\d{3}$").r,
         (value: String, segment: BaseSegmentation) =>
@@ -96,7 +97,7 @@ object Main {
       /*
        * YEAR
        */
-      /*
+//      /*
       (
         //
         numberWords.mkString("^([Aa]bout|[Aa]lmost|[Pp]robably|[Nn]early|[Rr]ougly) (", "|", ") [Yy]ears? ago$").r,
@@ -136,7 +137,7 @@ object Main {
       /*
        * MONTH
        */
-      /*
+//      /*
       ( // [Perfect] A month ago
         "^[Aa] month ago$".r,
         (value: String, segment: BaseSegmentation) =>
@@ -221,7 +222,7 @@ object Main {
       /*
        * WEEK
        */
-      /*
+//      /*
       (
         // [Perfect | -1 AV] X weeks ago
         numberWords.mkString("^(", "|", ") [Ww]eeks? ago$").r,
@@ -266,7 +267,7 @@ object Main {
       /*
        * DAY
        */
-    /*
+//    /*
       ( // [Perfect | -1 AV] Yesterday / A day ago
         "^([Yy]esterday|[Aa] day ago)$".r,
         (value: String, segment: BaseSegmentation) =>
@@ -346,9 +347,12 @@ object Main {
         "DURATION"
       )
       ,
+//    */
+
       /*
        * NUMERICS
        */
+//      /*
       (
         // [???] 1987-03
         "^([1-2]\\d\\d\\d)(-| )(\\d\\d)$".r,
@@ -372,10 +376,11 @@ object Main {
       )
       ,
 //      */
-      /*
-       * TIME
-       */
 
+      /*
+       * MINUTE
+       */
+//    /*
       ( // [No test case] 2 minutes
         "^\\d+ minutes?$".r,
         (value: String, segment: BaseSegmentation) =>
@@ -404,6 +409,12 @@ object Main {
         "DURATION"
       )
       ,
+//    */
+
+      /*
+       * HOUR
+       */
+//    /*
       ( // [Perfect] (More / Less than) Two hours
         numberWords.mkString("^(([Ll]ess|[Mm]ore) than )?(", "|", ")( |-)hours?$").r,
         (value: String, segment: BaseSegmentation) => {
@@ -417,12 +428,39 @@ object Main {
       )
       ,
       ( // [No test case] 2 hours
-        "\\d+( |-)hours?$".r,
+        "^\\d+( |-)hours?$".r,
         (value: String, segment: BaseSegmentation) => {
           s"PT${value.filter(_.isDigit)}H"
         },
         "DURATION"
       )
+      ,
+      ( // [Perfect] (Nearly) an hour
+        "^([Nn]early )?[Aa]n hour$".r,
+        (value: String, segment: BaseSegmentation) => "PT1H",
+        "DURATION"
+      )
+      ,
+//      */
+      /*
+       * WEEKDAY
+       */
+      ( // [Good | -19 AV, -8 AT, -4 FP] Day name
+        dayNames.mkString("^(", "|", ")$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val publication = publicationDates(segment.source)
+          val dayNumber = dayNames.indexOf(value) + 1
+          val publicationDayNumber = publication.localDate.getDayOfWeek
+
+          val addDays =
+            if (dayNumber < publicationDayNumber) publicationDayNumber - dayNumber
+            else if (dayNumber > publicationDayNumber) 7 - (dayNumber - publicationDayNumber)
+            else 0
+
+          publication.localDate.minusDays(addDays).toString
+        },
+        "DATE"
+        )
 
 
 
@@ -556,7 +594,7 @@ object Main {
         |""".stripMargin
   }
 
-  val segmentBan = "^(,|[Ii]n)$".r
+  val segmentBan = "^(,|[Ii]n|[Oo]n)$".r
 
   def outputTimesExtents(segments: List[BaseSegmentation]): String = {
     for {
