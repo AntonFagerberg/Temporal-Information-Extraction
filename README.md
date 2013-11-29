@@ -27,6 +27,10 @@ attribute value      0.88
 
 Due to time constraints, the recall did not reach higher than 1/3 but could be improved greatly if I had more time to work on it.
 
+### Demo
+
 A demo exists written in Play Framework which can be downloaded here:
 
 https://github.com/AntonFagerberg/Temporal-Information-Extraction-Demo
+
+![Screenshot](https://raw.github.com/AntonFagerberg/Temporal-Information-Extraction-Demo/master/screenshot.png)
