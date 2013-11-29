@@ -3,10 +3,9 @@ Temporal-Information-Extraction
 
 This project uses mainly regular expressions with some additional tweaking functions to extract temporal information (dates, durations, time, etc) from, mainly, news articles or any other text.
 
-Everything here should be viewed as a proof on concept. To code is not pretty and is targeted against the SemEval-2010 conference competition.
+Everything here should be viewed as a proof on concept. To code is not pretty and it is only targeted against the SemEval-2010 conference competition and not to be used in a real product.
 
 The code was evaluated against SemEval-2010 with the following results:
-
 
 ```bash
 true positives:   672
