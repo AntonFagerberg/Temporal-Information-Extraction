@@ -35,7 +35,6 @@ object Main {
       /*
        * JANUARY
        */
-//      /*
       ( // [Perfect] Ex: January 1983
         monthWords.mkString("^(", "|", ")( ,)?( |-)?[1-2]\\d{3}$").r,
         (value: String, segment: BaseSegmentation) =>
@@ -121,12 +120,10 @@ object Main {
         "DATE"
       )
       ,
-//      */
 
       /*
        * YEAR
        */
-//      /*
       (
         //
         numberWords.mkString("^([Aa]bout|[Aa]lmost|[Pp]robably|[Nn]early|[Rr]ougly) (", "|", ") [Yy]ears? ago$").r,
@@ -198,12 +195,10 @@ object Main {
         "DATE"
       )
       ,
-//      */
 
       /*
        * MONTH
        */
-//      /*
       ( // [Perfect] A month ago
         "^[Aa] month ago$".r,
         (value: String, segment: BaseSegmentation) =>
@@ -290,13 +285,11 @@ object Main {
         "DATE"
       )
       ,
-//      */
 
 
       /*
        * WEEK
        */
-//      /*
       (
         // [Perfect | -1 AV] X weeks ago
         numberWords.mkString("^(", "|", ") [Ww]eeks? ago$").r,
@@ -336,12 +329,19 @@ object Main {
         "DURATION"
       )
       ,
-//      */
+      (
+        // [Perfect] Two weeks
+        numberWords.mkString("^(", "|", ") [Ww]eeks?$").r,
+        (value: String, segment: BaseSegmentation) => {
+          s"P${numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)}W"
+        },
+        "DURATION"
+      )
+      ,
 
       /*
        * DAY
        */
-//    /*
       ( // [Perfect | -1 AV] Yesterday / A day ago
         "^([Yy]esterday|[Aa] day ago)$".r,
         (value: String, segment: BaseSegmentation) =>
