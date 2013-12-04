@@ -8,24 +8,25 @@ Everything here should be viewed as a proof on concept. To code is not pretty an
 The code was evaluated against SemEval-2010 with the following results:
 
 ```bash
-true positives:   672
-true negatives:   51280
-false positives:  53
-false negatives:  1445
+true positives:   1053
+true negatives:   51246
+false positives:  87
+false negatives:  1064
 
-attribute type: +382.0 -16.0
-attribute value: +350.0 -48.0
+attribute type: +546.0 -17.0
+attribute value: +494.0 -69.0
 
-precision   0.93
-recall      0.32
-f1-measure  0.47
-accuracy    0.97
+precision   0.92
+recall      0.50
+f1-measure  0.65
+accuracy    0.98
 
-attribute type       0.96 
-attribute value      0.88 
+attribute type       0.97
+attribute value      0.88
 ```
 
-Due to time constraints, the recall did not reach higher than 1/3 but could be improved greatly if I had more time to work on it.
+Due to time constraints, the recall did not reach higher than 50% but could be improved greatly if I had more time to work on it.
+This is a proof of concept but my belief is that this could work very good given enough time and dedication.
 
 ### Demo
 
