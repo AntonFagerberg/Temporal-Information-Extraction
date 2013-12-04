@@ -27,6 +27,7 @@ object Main {
 
   val numberWords = List("[Zz]ero", "[Oo]ne", "[Tt]wo", "[Tt]hree", "[Ff]our", "[Ff]ive", "[Ss]ix", "[Ss]even", "[Ee]ight", "[Nn]ine", "[Tt]en", "[Ee]leven", "[Tt]welve", "[Tt]hirteen", "[Ff]ourteen", "[Ff]ifteen", "[Ss]ixteen", "[Ss]eventeen", "[Ee]ighteen", "[Nn]ineteen", "[Tt]wenty", "[Tt]wenty [Oo]ne", "[Tt]wenty [Tt]wo", "[Tt]wenty [Tt]hree", "[Tt]wenty [Ff]our")
   val monthWords = List("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+  val monthWordsShort = List("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept?", "Oct", "Nov", "Dec")
   val dayNames = List("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
   val matches =
@@ -81,6 +82,27 @@ object Main {
         monthWords.mkString("^(", "|", ") \\d{1,2}$").r,
         (value: String, segment: BaseSegmentation) =>
           s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.filter(_.isDigit)).takeRight(2)}",
+        "DATE"
+      )
+      ,
+      ( // [No test case] Jan 12 1998
+        monthWordsShort.mkString("^(", "|", ") ?\\.? ?\\d{1,2} (, )?[1-2]\\d{3}$").r,
+        (value: String, segment: BaseSegmentation) =>
+          s"${value.takeRight(4)}-${("0" + (1 + monthWordsShort.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.dropRight(4).filter(_.isDigit)).takeRight(2)}",
+        "DATE"
+      )
+      ,
+      ( // [No test case] Jan 12 last year
+        monthWordsShort.mkString("^(", "|", ") ?\\.? ?\\d{1,2} last year$").r,
+        (value: String, segment: BaseSegmentation) =>
+          s"${publicationDates(segment.source).localDate.minusYears(1).getYear}-${("0" + (1 + monthWordsShort.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.filter(_.isDigit)).takeRight(2)}",
+        "DATE"
+      )
+      ,
+      ( // [Good] Jan 12
+        monthWordsShort.mkString("^(", "|", ") ?\\.? ?\\d{1,2}$").r,
+        (value: String, segment: BaseSegmentation) =>
+          s"${publicationDates(segment.source).year}-${("0" + (1 + monthWordsShort.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}-${("0" + value.filter(_.isDigit)).takeRight(2)}",
         "DATE"
       )
       ,
