@@ -5,7 +5,7 @@ This project uses mainly regular expressions with some additional tweaking funct
 
 Everything here should be viewed as a proof on concept. To code is not pretty and it is only targeted against the SemEval-2010 conference competition and not to be used in a real product.
 
-The code was evaluated against SemEval-2010 with the following results:
+The code was evaluated against SemEval-2010 with the following results against the training set:
 
 ```bash
 true positives:   1053
@@ -25,8 +25,28 @@ attribute type       0.97
 attribute value      0.88
 ```
 
-Due to time constraints, the recall did not reach higher than 50% but could be improved greatly if I had more time to work on it.
-This is a proof of concept but my belief is that this could work very good given enough time and dedication.
+Due to time constraints, I decided to quit when reaching 50% - but I believe that this could be greatly improved if I had more time to work on it.
+This is only a proof of concept but my belief is that this could work very good given enough time and dedication.
+
+After reaching 50% on the training set and deciding that I was done with it, I ran it against the test set with the following results:
+
+```bash
+true positives:   165
+true negatives:   9336
+false positives:  8
+false negatives:  104
+
+attribute type: +94.0 -4.0
+attribute value: +86.0 -12.0
+
+precision   0.95
+recall      0.61
+f1-measure  0.75
+accuracy    0.99
+
+attribute type       0.96
+attribute value      0.88
+```
 
 ### Demo
 
