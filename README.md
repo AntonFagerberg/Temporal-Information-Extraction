@@ -50,7 +50,11 @@ attribute value      0.88
 
 ### Demo
 
-A demo exists written in Play Framework which can be downloaded here:
+A demo exists written in Play Framework which you can try here:
+
+http://tempex.antonfagerberg.com
+
+And also browse the source:
 
 https://github.com/AntonFagerberg/Temporal-Information-Extraction-Demo
 
