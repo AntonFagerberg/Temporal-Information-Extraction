@@ -86,8 +86,15 @@ object Main {
       ,
       ( // [OK] Jaunary
         monthWords.mkString("^(", "|", ")$").r,
-        (value: String, segment: BaseSegmentation) =>
-          s"${publicationDates(segment.source).year}-${("0" + (1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined))).takeRight(2)}"
+        (value: String, segment: BaseSegmentation) => {
+          val monthNumber = 1 + monthWords.indexWhere(_.r.findPrefixOf(value).isDefined)
+          val publicationMonthNumber = publicationDates(segment.source).localDate.getMonthOfYear
+          val subtractYears =
+            if (publicationMonthNumber < monthNumber) 1
+            else 0
+
+          s"${publicationDates(segment.source).localDate.minusYears(subtractYears).getYear}-${("0" + monthNumber).takeRight(2)}"
+        }
         ,
         "DATE"
       )
@@ -130,6 +137,24 @@ object Main {
           s"P${index}Y"
         },
         "DURATION"
+      )
+      ,
+      (
+        // [Perfect] 2 years
+        "^\\d+(-| )[Yy]ears?$".r,
+        (value: String, segment: BaseSegmentation) => {
+          s"P${value.filter(_.isDigit)}Y"
+        },
+        "DURATION"
+      )
+      ,
+      (
+        // [Good] This year.
+        "^[Tt]his year$".r,
+        (value: String, segment: BaseSegmentation) => {
+          publicationDates(segment.source).year
+        },
+        "DATE"
       )
       ,
 //      */
@@ -214,6 +239,14 @@ object Main {
           s"P${numberIndex}M"
         },
         "DURATION"
+      ),
+      (
+        // [Good] This month.
+        "^[Tt]his month$".r,
+        (value: String, segment: BaseSegmentation) => {
+          publicationDates(segment.source).localDate.toString("YYYY-MM")
+        },
+        "DATE"
       )
       ,
 //      */
@@ -435,6 +468,15 @@ object Main {
         "DURATION"
       )
       ,
+      ( // [No test case] Two hours
+        numberWords.mkString("^(", "|", ")( |-)hours?$").r,
+        (value: String, segment: BaseSegmentation) => {
+          val numberIndex = numberWords.indexWhere(_.r.findPrefixOf(value).isDefined)
+          s"PT${numberIndex}H"
+        },
+        "DURATION"
+      )
+      ,
       ( // [Perfect] (Nearly) an hour
         "^([Nn]early )?[Aa]n hour$".r,
         (value: String, segment: BaseSegmentation) => "PT1H",
@@ -460,7 +502,7 @@ object Main {
           publication.localDate.minusDays(addDays).toString
         },
         "DATE"
-        )
+      )
 
 
 
